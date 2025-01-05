@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import '../styles/globals.css';
 // import MenuLateral from './../components/template/MenuLateral';
 import { AppProvider } from '@/data/context/AppContext';
+import { AuthProvider } from './../data/context/AuthContext';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -16,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body>
-        <AppProvider>{children}</AppProvider>
+        <AuthProvider>
+          <AppProvider>{children}</AppProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -2,17 +2,40 @@
 import AuthInput from '@/components/auth/AuthInput';
 import IconGoogle, { IconSaude } from '../../components/icons/index';
 import { useState } from 'react';
+import { IconAlerta } from '@/components/icons';
+import useAuth from '@/data/hook/useAuth';
 
 export default function Autenticacao() {
+  const { cadastrar, login, loginGoogle } = useAuth();
+
   const [modo, setModo] = useState<'login' | 'cadastro'>('login');
+  const [erro, setErro] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-  function submeter() {
-    if (modo === 'login') {
-      console.log('Logando com', email, senha);
-    } else {
-      console.log('Cadastrando com', email, senha);
+  function exibirErro(msg: string, tempoEmSegundos = 5) {
+    setErro(msg);
+    setTimeout(() => setErro(null), tempoEmSegundos * 1000); // 5 segundos
+  }
+
+  async function submeter() {
+    if (!login || !cadastrar) {
+      exibirErro('Sistema de autenticação não disponível');
+      return;
+    }
+
+    try {
+      if (modo === 'login') {
+        await login(email, senha);
+      } else {
+        await cadastrar(email, senha);
+      }
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        exibirErro(e.message);
+      } else {
+        exibirErro('Ocorreu um erro inesperado');
+      }
     }
   }
 
@@ -37,6 +60,13 @@ export default function Autenticacao() {
               ? 'Entre com sua conta'
               : 'Cadastre-se na plataforma'}
           </h1>
+          {erro ? (
+            <div className="my-2 flex items-center justify-center rounded-lg border border-red-500 bg-red-400 px-4 py-3 text-white">
+              {IconAlerta()}
+              <span className="ml-3"> {erro}</span>
+            </div>
+          ) : null}
+
           <AuthInput
             label="Email"
             tipo="email"
@@ -60,7 +90,7 @@ export default function Autenticacao() {
             <hr className="my-6 w-full border-gray-300" />
 
             <button
-              onClick={submeter}
+              onClick={loginGoogle}
               className="mt-2 flex w-2/4 items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-700"
             >
               {' '}
